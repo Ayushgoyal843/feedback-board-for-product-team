@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const STORAGE_KEY = "signal-board-items";
 
 const CATEGORIES = ["Bug", "Feature", "Improvement"];
 const STATUSES = ["New", "Planned", "In Progress", "Shipped"];
@@ -177,10 +179,21 @@ function NewFeedbackForm({ onAdd, onClose }) {
 }
 
 export default function App() {
-  const [items, setItems] = useState(SEED);
+  const [items, setItems] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : SEED;
+  });
   const [filter, setFilter] = useState("All");
   const [showForm, setShowForm] = useState(false);
-  const [nextId, setNextId] = useState(SEED.length + 1);
+  const [nextId, setNextId] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : SEED;
+    return parsed.length ? Math.max(...parsed.map((i) => i.id)) + 1 : 1;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   const upvote = (id) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, votes: i.votes + 1 } : i)));
