@@ -74,7 +74,7 @@ function CategoryTag({ category }) {
   );
 }
 
-function FeedbackCard({ item, onUpvote, onStatusChange }) {
+function FeedbackCard({ item, onUpvote, onStatusChange, onDelete }) {
   return (
     <div
       className="rounded-lg p-3 mb-3"
@@ -98,18 +98,31 @@ function FeedbackCard({ item, onUpvote, onStatusChange }) {
       </p>
       <div className="flex items-center justify-between mt-3">
         <CategoryTag category={item.category} />
-        <select
-          value={item.status}
-          onChange={(e) => onStatusChange(item.id, e.target.value)}
-          className="text-xs rounded px-1.5 py-1"
-          style={{ border: "1px solid #DAD5C7", color: "#5B5342", background: "#FBFAF6" }}
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={item.status}
+            onChange={(e) => onStatusChange(item.id, e.target.value)}
+            className="text-xs rounded px-1.5 py-1"
+            style={{ border: "1px solid #DAD5C7", color: "#5B5342", background: "#FBFAF6" }}
+          >
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              if (window.confirm("Delete this feedback item?")) onDelete(item.id);
+            }}
+            className="text-xs px-1.5 py-1 rounded"
+            style={{ color: "#A8532E" }}
+            aria-label="Delete feedback"
+            title="Delete"
+          >
+            &#10005;
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -201,6 +214,9 @@ export default function App() {
   const changeStatus = (id, status) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
 
+  const deleteItem = (id) =>
+    setItems((prev) => prev.filter((i) => i.id !== id));
+
   const addItem = ({ title, description, category }) => {
     setItems((prev) => [
       ...prev,
@@ -277,6 +293,7 @@ export default function App() {
                     item={item}
                     onUpvote={upvote}
                     onStatusChange={changeStatus}
+                    onDelete={deleteItem}
                   />
                 ))}
               </div>
